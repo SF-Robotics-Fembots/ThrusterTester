@@ -1,0 +1,54 @@
+{
+    "presets": {
+        "TD1.2": {
+            "name": "Diamond Dynamics TD1.2",
+            "description": "Diamond Dynamics TD1.2 thruster",
+            "min_pwm_us": 1100,
+            "max_pwm_us": 1900,
+            "neutral_pwm_us": 1500,
+            "pwm_frequency_hz": 50,
+            "notes": "Standard ESC timing"
+        },
+        "T100": {
+            "name": "Blue Robotics T100",
+            "description": "Blue Robotics T100 thruster",
+            "min_pwm_us": 1100,
+            "max_pwm_us": 1900,
+            "neutral_pwm_us": 1500,
+            "pwm_frequency_hz": 50,
+            "notes": "Standard ESC timing, max thrust ~2.36 kgf"
+        },
+        "T200": {
+            "name": "Blue Robotics T200",
+            "description": "Blue Robotics T200 thruster",
+            "min_pwm_us": 1100,
+            "max_pwm_us": 1900,
+            "neutral_pwm_us": 1500,
+            "pwm_frequency_hz": 50,
+            "notes": "Standard ESC timing, max thrust ~5.25 kgf"
+        },
+        "Custom": {
+            "name": "Custom Thruster",
+            "description": "User-defined thruster configuration",
+            "min_pwm_us": 1000,
+            "max_pwm_us": 2000,
+            "neutral_pwm_us": 1500,
+            "pwm_frequency_hz": 50,
+            "notes": "Adjust values as needed"
+        }
+    },
+    "test_parameters": {
+        "pwm_step_us": 25,
+        "deadband_step_us": 5,
+        "stabilization_time_ms": 500,
+        "thrust_noise_threshold_kg": 0.01,
+        "sample_count": 5
+    },
+    "hardware": {
+        "pca9685_address": "0x40",
+        "ina228_address": "0x41",
+        "hx711_dout_pin": 5,
+        "hx711_sck_pin": 6,
+        "pwm_channel": 0
+    }
+}

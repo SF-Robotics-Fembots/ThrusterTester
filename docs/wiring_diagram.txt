@@ -1,0 +1,222 @@
+================================================================================
+                    THRUSTER TESTER WIRING DIAGRAM
+                         Raspberry Pi 4
+================================================================================
+
+
+                         RASPBERRY PI 4 GPIO HEADER
+                         (Pin 1 is top-left, near USB-C)
+
+                              3.3V [1]  [2]  5V
+                     I2C SDA (GPIO 2) [3]  [4]  5V
+                     I2C SCL (GPIO 3) [5]  [6]  GND
+                             (GPIO 4) [7]  [8]  GPIO 14
+                               GND [9]  [10] GPIO 15
+                            (GPIO 17) [11] [12] GPIO 18
+                            (GPIO 27) [13] [14] GND
+                            (GPIO 22) [15] [16] GPIO 23
+                              3.3V [17] [18] GPIO 24
+                            (GPIO 10) [19] [20] GND
+                             (GPIO 9) [21] [22] GPIO 25
+                            (GPIO 11) [23] [24] GPIO 8
+                               GND [25] [26] GPIO 7
+                             (GPIO 0) [27] [28] GPIO 1
+                   HX711 DOUT (GPIO 5) [29] [30] GND
+                    HX711 SCK (GPIO 6) [31] [32] GPIO 12
+                            (GPIO 13) [33] [34] GND
+                            (GPIO 19) [35] [36] GPIO 16
+                            (GPIO 26) [37] [38] GPIO 20
+                               GND [39] [40] GPIO 21
+
+
+================================================================================
+                              WIRING CONNECTIONS
+================================================================================
+
+I2C BUS (shared by PCA9685 and INA228)
+--------------------------------------
+
+    Raspberry Pi                PCA9685                 INA228
+    ------------                -------                 ------
+    Pin 3  (GPIO 2/SDA) ------> SDA ---------------->  SDA
+    Pin 5  (GPIO 3/SCL) ------> SCL ---------------->  SCL
+    Pin 1  (3.3V)       ------> VCC                    VCC
+    Pin 6  (GND)        ------> GND ---------------->  GND
+
+    Note: PCA9685 and INA228 share the same I2C bus (directly daisy-chained)
+
+    Default I2C Addresses:
+    - PCA9685: 0x40
+    - INA228:  0x41 (may need address jumper - check your board)
+
+
+HX711 LOAD CELL AMPLIFIER
+-------------------------
+
+    Raspberry Pi                HX711
+    ------------                -----
+    Pin 29 (GPIO 5)  ---------> DOUT (Data Out)
+    Pin 31 (GPIO 6)  ---------> SCK  (Clock)
+    Pin 2  (5V)      ---------> VCC
+    Pin 14 (GND)     ---------> GND
+
+
+LOAD CELL TO HX711
+------------------
+
+    Load Cell                   HX711
+    ---------                   -----
+    Red (E+)      ------------> E+
+    Black (E-)    ------------> E-
+    White (A-)    ------------> A-
+    Green (A+)    ------------> A+
+
+    Note: Wire colors may vary by manufacturer. Check your load cell datasheet.
+    Common configurations:
+    - Red: Excitation+ (E+)
+    - Black: Excitation- (E-)
+    - White: Signal- (A-)
+    - Green: Signal+ (A+)
+
+
+PCA9685 TO ESC/THRUSTER
+-----------------------
+
+    PCA9685                     ESC
+    -------                     ---
+    Channel 0 PWM  -----------> Signal (usually white/yellow wire)
+    GND            -----------> Ground (usually black/brown wire)
+
+    DO NOT connect ESC power (red wire) to PCA9685!
+    ESC should be powered by your main battery/power supply.
+
+    PCA9685                     External Power (for servos if needed)
+    -------                     --------------
+    V+             -----------> 5-6V power supply (optional, for servo power)
+    GND            -----------> Power supply GND
+
+
+INA228 POWER MEASUREMENT
+------------------------
+
+    Power Supply (+) ----+----> Thruster ESC (+)
+                         |
+                       [INA228 IN+]
+                         |
+                       [INA228 IN-]-----> (internal shunt)
+                         |
+    Power Supply (-) ----+----> Thruster ESC (-)
+                         |
+                        GND (common with Pi GND)
+
+    Note: The INA228 measures current through its internal shunt resistor.
+    Connect it IN-LINE with your power supply to the ESC.
+
+
+================================================================================
+                              WIRING DIAGRAM (ASCII)
+================================================================================
+
+                                    +-------------+
+                                    |   LOAD     |
+                                    |    CELL    |
+                                    +------+------+
+                                           |
+                          Red Black White Green
+                           |    |     |     |
+                           E+   E-    A-    A+
+                        +--+----+-----+-----+--+
+                        |        HX711         |
+                        |                      |
+                        |  VCC  GND  DOUT SCK  |
+                        +---+----+----+----+---+
+                            |    |    |    |
+                            |    |    |    |
+    +-------------+         |    |    |    |
+    |             |  5V ----+    |    |    |
+    |             |  GND --------+    |    |
+    |             |  GPIO5 -----------+    |
+    |    RPI 4    |  GPIO6 ----------------+
+    |             |
+    |             |  3.3V ---+------------------+
+    |             |  GND ----+-------+          |
+    |             |  SDA ----+-+     |          |
+    |             |  SCL ---+| |     |          |
+    +-------------+         || |     |          |
+                            || |     |          |
+                        +---++-+-----+---+  +---+-------+
+                        |  SCL SDA  GND VCC|  |VCC GND  |
+                        |                  |  |   SDA SCL
+                        |     PCA9685      |  |  INA228 |
+                        |                  |  |         |
+                        |  CH0   GND   V+  |  | IN+ IN- |
+                        +---+-----+----+---+  +--+---+--+
+                            |     |    |         |   |
+                            |     |    |         |   |
+                         Signal  GND  (opt)      |   |
+                            |     |              |   |
+                        +---+-----+---+          |   |
+                        |     ESC     |          |   |
+                        |             +----------+   |
+                        |   +  -      |              |
+                        +---+--+------+              |
+                            |  |                     |
+                            |  +---------------------+
+                            |
+                      +-----+-----+
+                      |  BATTERY  |
+                      |  /POWER   |
+                      |  SUPPLY   |
+                      +-----------+
+
+
+================================================================================
+                              VERIFICATION STEPS
+================================================================================
+
+1. CHECK I2C DEVICES:
+
+   sudo i2cdetect -y 1
+
+   Expected output shows devices at 0x40 (PCA9685) and 0x41 (INA228):
+
+        0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+   00:          -- -- -- -- -- -- -- -- -- -- -- -- --
+   10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+   20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+   30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+   40: 40 41 -- -- -- -- -- -- -- -- -- -- -- -- -- --
+   50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+   60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+   70: -- -- -- -- -- -- -- --
+
+
+2. TEST HX711:
+
+   python3 -c "from src.hardware.load_cell import LoadCell; lc = LoadCell(); print(lc.read_kg())"
+
+
+3. TEST PWM:
+
+   python3 main.py --simulate
+   (Use the Tools -> Test PWM Output menu)
+
+
+================================================================================
+                              SAFETY WARNINGS
+================================================================================
+
+⚠️  ALWAYS disconnect thruster/propeller before testing PWM signals!
+
+⚠️  The thruster can spin unexpectedly - keep hands and objects clear!
+
+⚠️  Use appropriate power supply rated for your thruster current draw
+
+⚠️  Ensure common ground between Pi, PCA9685, INA228, and power supply
+
+⚠️  Double-check polarity before applying power
+
+⚠️  The INA228 must be rated for your expected current (check shunt value)
+
+
+================================================================================

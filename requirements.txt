@@ -1,0 +1,19 @@
+# Thruster Tester Application Dependencies
+# For Raspberry Pi Zero with PCA9685, INA228, and HX711
+
+# Adafruit libraries for hardware interfaces
+Adafruit-Blinka>=8.26.0
+adafruit-circuitpython-pca9685>=3.4.11
+adafruit-circuitpython-ina228>=1.0.0
+adafruit-circuitpython-busdevice>=5.2.0
+
+# GPIO and hardware
+RPi.GPIO>=0.7.0
+
+# Data visualization (for embedded graphs)
+matplotlib>=3.7.0
+
+# Database
+# SQLite is built into Python
+
+# Note: HX711 library will be implemented directly due to timing requirements
