@@ -1,0 +1,415 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 750">
+  <defs>
+    <style>
+      .title { font: bold 24px sans-serif; fill: #333; }
+      .subtitle { font: 14px sans-serif; fill: #666; }
+      .component-label { font: bold 12px sans-serif; fill: #333; }
+      .pin-label { font: 10px monospace; fill: #333; }
+      .pin-label-small { font: 8px monospace; fill: #555; }
+      .wire-label { font: 9px sans-serif; fill: #333; }
+      .warning { font: bold 11px sans-serif; fill: #c00; }
+      .note { font: 10px sans-serif; fill: #666; }
+      .address { font: 9px monospace; fill: #006; }
+    </style>
+    <!-- Arrow marker -->
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#666"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1000" height="750" fill="#f8f9fa"/>
+
+  <!-- Title -->
+  <text x="500" y="35" text-anchor="middle" class="title">Thruster Tester Wiring Diagram</text>
+  <text x="500" y="55" text-anchor="middle" class="subtitle">Raspberry Pi 4 + PCA9685 + INA228 + HX711</text>
+
+  <!-- ==================== RASPBERRY PI 4 ==================== -->
+  <g transform="translate(50, 100)">
+    <!-- Board outline -->
+    <rect x="0" y="0" width="180" height="280" rx="8" fill="#2d5016" stroke="#1a3009" stroke-width="2"/>
+    <rect x="10" y="10" width="160" height="260" rx="4" fill="#3d6b1e"/>
+
+    <!-- Label -->
+    <text x="90" y="-10" text-anchor="middle" class="component-label">RASPBERRY PI 4</text>
+
+    <!-- USB ports (right side) -->
+    <rect x="170" y="30" width="20" height="25" fill="#333" rx="2"/>
+    <rect x="170" y="60" width="20" height="25" fill="#333" rx="2"/>
+    <rect x="170" y="100" width="20" height="40" fill="#336" rx="2"/>
+    <rect x="170" y="145" width="20" height="40" fill="#336" rx="2"/>
+
+    <!-- Ethernet -->
+    <rect x="170" y="200" width="20" height="50" fill="#996" rx="2"/>
+
+    <!-- GPIO Header -->
+    <rect x="25" y="25" width="70" height="240" fill="#222" rx="2"/>
+    <text x="60" y="20" text-anchor="middle" class="pin-label-small" fill="#fff">GPIO HEADER</text>
+
+    <!-- GPIO Pins - Left column (odd pins) -->
+    <g fill="#fc0">
+      <!-- Pin 1 - 3.3V -->
+      <circle cx="35" cy="40" r="4"/><text x="18" y="43" class="pin-label-small" fill="#ffa">3V3</text>
+      <!-- Pin 3 - SDA -->
+      <circle cx="35" cy="55" r="4" fill="#4af"/><text x="12" y="58" class="pin-label-small" fill="#4af">SDA</text>
+      <!-- Pin 5 - SCL -->
+      <circle cx="35" cy="70" r="4" fill="#4af"/><text x="12" y="73" class="pin-label-small" fill="#4af">SCL</text>
+      <!-- Pin 7 -->
+      <circle cx="35" cy="85" r="4" fill="#4c4"/>
+      <!-- Pin 9 - GND -->
+      <circle cx="35" cy="100" r="4" fill="#333" stroke="#666"/><text x="12" y="103" class="pin-label-small" fill="#aaa">GND</text>
+      <!-- Pins 11-25 -->
+      <circle cx="35" cy="115" r="4" fill="#4c4"/>
+      <circle cx="35" cy="130" r="4" fill="#4c4"/>
+      <circle cx="35" cy="145" r="4" fill="#4c4"/>
+      <circle cx="35" cy="160" r="4" fill="#fc0"/>
+      <circle cx="35" cy="175" r="4" fill="#4c4"/>
+      <circle cx="35" cy="190" r="4" fill="#4c4"/>
+      <circle cx="35" cy="205" r="4" fill="#4c4"/>
+      <circle cx="35" cy="220" r="4" fill="#333" stroke="#666"/>
+      <!-- Pin 29 - GPIO5 -->
+      <circle cx="35" cy="235" r="4" fill="#f4a"/><text x="5" y="238" class="pin-label-small" fill="#f4a">GP5</text>
+      <!-- Pin 31 - GPIO6 -->
+      <circle cx="35" cy="250" r="4" fill="#f4a"/><text x="5" y="253" class="pin-label-small" fill="#f4a">GP6</text>
+    </g>
+
+    <!-- GPIO Pins - Right column (even pins) -->
+    <g>
+      <!-- Pin 2 - 5V -->
+      <circle cx="85" cy="40" r="4" fill="#f44"/><text x="92" y="43" class="pin-label-small" fill="#f66">5V</text>
+      <!-- Pin 4 - 5V -->
+      <circle cx="85" cy="55" r="4" fill="#f44"/><text x="92" y="58" class="pin-label-small" fill="#f66">5V</text>
+      <!-- Pin 6 - GND -->
+      <circle cx="85" cy="70" r="4" fill="#333" stroke="#666"/><text x="92" y="73" class="pin-label-small" fill="#aaa">GND</text>
+      <!-- Pins 8-20 -->
+      <circle cx="85" cy="85" r="4" fill="#4c4"/>
+      <circle cx="85" cy="100" r="4" fill="#4c4"/>
+      <circle cx="85" cy="115" r="4" fill="#4c4"/>
+      <circle cx="85" cy="130" r="4" fill="#4c4"/>
+      <!-- Pin 14 - GND -->
+      <circle cx="85" cy="145" r="4" fill="#333" stroke="#666"/><text x="92" y="148" class="pin-label-small" fill="#aaa">GND</text>
+      <circle cx="85" cy="160" r="4" fill="#4c4"/>
+      <circle cx="85" cy="175" r="4" fill="#4c4"/>
+      <circle cx="85" cy="190" r="4" fill="#4c4"/>
+      <circle cx="85" cy="205" r="4" fill="#333" stroke="#666"/>
+      <circle cx="85" cy="220" r="4" fill="#4c4"/>
+      <circle cx="85" cy="235" r="4" fill="#333" stroke="#666"/>
+      <circle cx="85" cy="250" r="4" fill="#4c4"/>
+    </g>
+
+    <!-- Pin numbers -->
+    <text x="60" y="275" text-anchor="middle" class="pin-label-small" fill="#aaa">1-40</text>
+  </g>
+
+  <!-- ==================== PCA9685 ==================== -->
+  <g transform="translate(350, 120)">
+    <!-- Board outline -->
+    <rect x="0" y="0" width="140" height="100" rx="5" fill="#1a237e" stroke="#0d1442" stroke-width="2"/>
+
+    <!-- Label -->
+    <text x="70" y="-10" text-anchor="middle" class="component-label">PCA9685</text>
+    <text x="70" y="5" text-anchor="middle" class="address">(PWM Controller)</text>
+    <text x="70" y="18" text-anchor="middle" class="address">Addr: 0x40</text>
+
+    <!-- Input pins (left side) -->
+    <rect x="-5" y="30" width="10" height="8" fill="#fc0"/>
+    <text x="-15" y="37" text-anchor="end" class="pin-label">VCC</text>
+
+    <rect x="-5" y="45" width="10" height="8" fill="#333"/>
+    <text x="-15" y="52" text-anchor="end" class="pin-label">GND</text>
+
+    <rect x="-5" y="60" width="10" height="8" fill="#4af"/>
+    <text x="-15" y="67" text-anchor="end" class="pin-label">SDA</text>
+
+    <rect x="-5" y="75" width="10" height="8" fill="#4af"/>
+    <text x="-15" y="82" text-anchor="end" class="pin-label">SCL</text>
+
+    <!-- Output pins (right side) - PWM channels -->
+    <rect x="135" y="30" width="10" height="8" fill="#f90"/>
+    <text x="150" y="37" text-anchor="start" class="pin-label">CH0</text>
+
+    <rect x="135" y="45" width="10" height="8" fill="#999"/>
+    <text x="150" y="52" text-anchor="start" class="pin-label">CH1</text>
+
+    <rect x="135" y="60" width="10" height="8" fill="#999"/>
+    <text x="150" y="67" text-anchor="start" class="pin-label">...</text>
+
+    <rect x="135" y="75" width="10" height="8" fill="#333"/>
+    <text x="150" y="82" text-anchor="start" class="pin-label">GND</text>
+  </g>
+
+  <!-- ==================== INA228 ==================== -->
+  <g transform="translate(350, 280)">
+    <!-- Board outline -->
+    <rect x="0" y="0" width="140" height="120" rx="5" fill="#4a148c" stroke="#2a0a4c" stroke-width="2"/>
+
+    <!-- Label -->
+    <text x="70" y="-10" text-anchor="middle" class="component-label">INA228</text>
+    <text x="70" y="5" text-anchor="middle" class="address">(Power Monitor)</text>
+    <text x="70" y="18" text-anchor="middle" class="address">Addr: 0x41</text>
+
+    <!-- I2C pins (left side) -->
+    <rect x="-5" y="35" width="10" height="8" fill="#fc0"/>
+    <text x="-15" y="42" text-anchor="end" class="pin-label">VCC</text>
+
+    <rect x="-5" y="50" width="10" height="8" fill="#333"/>
+    <text x="-15" y="57" text-anchor="end" class="pin-label">GND</text>
+
+    <rect x="-5" y="65" width="10" height="8" fill="#4af"/>
+    <text x="-15" y="72" text-anchor="end" class="pin-label">SDA</text>
+
+    <rect x="-5" y="80" width="10" height="8" fill="#4af"/>
+    <text x="-15" y="87" text-anchor="end" class="pin-label">SCL</text>
+
+    <!-- Power measurement pins (right side) -->
+    <rect x="135" y="45" width="10" height="8" fill="#f44"/>
+    <text x="150" y="52" text-anchor="start" class="pin-label">IN+</text>
+
+    <rect x="135" y="65" width="10" height="8" fill="#333"/>
+    <text x="150" y="72" text-anchor="start" class="pin-label">IN-</text>
+  </g>
+
+  <!-- ==================== HX711 ==================== -->
+  <g transform="translate(350, 460)">
+    <!-- Board outline -->
+    <rect x="0" y="0" width="140" height="110" rx="5" fill="#006064" stroke="#003d40" stroke-width="2"/>
+
+    <!-- Label -->
+    <text x="70" y="-10" text-anchor="middle" class="component-label">HX711</text>
+    <text x="70" y="5" text-anchor="middle" class="address">(Load Cell Amp)</text>
+
+    <!-- Pi connection pins (left side) -->
+    <rect x="-5" y="30" width="10" height="8" fill="#f44"/>
+    <text x="-15" y="37" text-anchor="end" class="pin-label">VCC</text>
+
+    <rect x="-5" y="45" width="10" height="8" fill="#333"/>
+    <text x="-15" y="52" text-anchor="end" class="pin-label">GND</text>
+
+    <rect x="-5" y="60" width="10" height="8" fill="#f4a"/>
+    <text x="-15" y="67" text-anchor="end" class="pin-label">DOUT</text>
+
+    <rect x="-5" y="75" width="10" height="8" fill="#f4a"/>
+    <text x="-15" y="82" text-anchor="end" class="pin-label">SCK</text>
+
+    <!-- Load cell pins (right side) -->
+    <rect x="135" y="25" width="10" height="8" fill="#f44"/>
+    <text x="150" y="32" text-anchor="start" class="pin-label">E+</text>
+
+    <rect x="135" y="40" width="10" height="8" fill="#333"/>
+    <text x="150" y="47" text-anchor="start" class="pin-label">E-</text>
+
+    <rect x="135" y="60" width="10" height="8" fill="#fff" stroke="#333"/>
+    <text x="150" y="67" text-anchor="start" class="pin-label">A-</text>
+
+    <rect x="135" y="75" width="10" height="8" fill="#4c4"/>
+    <text x="150" y="82" text-anchor="start" class="pin-label">A+</text>
+  </g>
+
+  <!-- ==================== LOAD CELL ==================== -->
+  <g transform="translate(580, 460)">
+    <!-- Load cell body -->
+    <rect x="0" y="0" width="120" height="80" rx="3" fill="#ddd" stroke="#999" stroke-width="2"/>
+    <rect x="20" y="20" width="80" height="40" fill="#ccc" stroke="#999"/>
+    <text x="60" y="45" text-anchor="middle" class="component-label">LOAD CELL</text>
+
+    <!-- Strain gauge symbol -->
+    <path d="M35 30 L45 30 L40 35 L50 35 L45 40 L55 40 L50 45 L60 45" stroke="#666" fill="none" stroke-width="1.5"/>
+
+    <!-- Wires coming out -->
+    <line x1="0" y1="25" x2="-30" y2="25" stroke="#f44" stroke-width="3"/>
+    <line x1="0" y1="40" x2="-30" y2="40" stroke="#333" stroke-width="3"/>
+    <line x1="0" y1="55" x2="-30" y2="55" stroke="#fff" stroke-width="3"/>
+    <line x1="0" y1="70" x2="-30" y2="70" stroke="#4c4" stroke-width="3"/>
+
+    <!-- Wire labels -->
+    <text x="-35" y="28" text-anchor="end" class="pin-label-small">Red (E+)</text>
+    <text x="-35" y="43" text-anchor="end" class="pin-label-small">Blk (E-)</text>
+    <text x="-35" y="58" text-anchor="end" class="pin-label-small">Wht (A-)</text>
+    <text x="-35" y="73" text-anchor="end" class="pin-label-small">Grn (A+)</text>
+  </g>
+
+  <!-- ==================== ESC ==================== -->
+  <g transform="translate(600, 120)">
+    <!-- ESC body -->
+    <rect x="0" y="0" width="100" height="70" rx="5" fill="#333" stroke="#111" stroke-width="2"/>
+    <text x="50" y="25" text-anchor="middle" fill="#fff" class="component-label">ESC</text>
+    <text x="50" y="40" text-anchor="middle" fill="#aaa" class="pin-label-small">Motor Controller</text>
+
+    <!-- Input wires (from PCA9685) -->
+    <rect x="-5" y="20" width="10" height="6" fill="#f90"/>
+    <text x="-10" y="26" text-anchor="end" class="pin-label">Signal</text>
+
+    <rect x="-5" y="35" width="10" height="6" fill="#333" stroke="#666"/>
+    <text x="-10" y="41" text-anchor="end" class="pin-label">GND</text>
+
+    <!-- Power wires -->
+    <rect x="-5" y="55" width="10" height="6" fill="#f44"/>
+    <text x="-10" y="61" text-anchor="end" class="pin-label">Batt+</text>
+
+    <!-- Output to motor -->
+    <rect x="95" y="30" width="10" height="8" fill="#00f"/>
+    <rect x="95" y="42" width="10" height="8" fill="#ff0"/>
+    <rect x="95" y="54" width="10" height="8" fill="#0f0"/>
+    <text x="110" y="50" text-anchor="start" class="pin-label">Motor</text>
+  </g>
+
+  <!-- ==================== THRUSTER ==================== -->
+  <g transform="translate(750, 100)">
+    <!-- Motor body -->
+    <ellipse cx="50" cy="50" rx="45" ry="45" fill="#444" stroke="#222" stroke-width="3"/>
+    <ellipse cx="50" cy="50" rx="30" ry="30" fill="#555"/>
+    <circle cx="50" cy="50" r="10" fill="#333"/>
+
+    <!-- Propeller blades -->
+    <ellipse cx="50" cy="20" rx="8" ry="20" fill="#666" transform="rotate(0, 50, 50)"/>
+    <ellipse cx="50" cy="20" rx="8" ry="20" fill="#666" transform="rotate(120, 50, 50)"/>
+    <ellipse cx="50" cy="20" rx="8" ry="20" fill="#666" transform="rotate(240, 50, 50)"/>
+
+    <text x="50" y="115" text-anchor="middle" class="component-label">THRUSTER</text>
+  </g>
+
+  <!-- ==================== POWER SUPPLY ==================== -->
+  <g transform="translate(600, 250)">
+    <!-- Battery/PSU -->
+    <rect x="0" y="0" width="120" height="60" rx="5" fill="#666" stroke="#333" stroke-width="2"/>
+    <rect x="120" y="15" width="8" height="30" fill="#888"/>
+    <text x="60" y="25" text-anchor="middle" fill="#fff" class="component-label">POWER</text>
+    <text x="60" y="42" text-anchor="middle" fill="#ccc" class="pin-label">12-24V Battery</text>
+
+    <!-- Terminals -->
+    <rect x="-5" y="15" width="10" height="10" fill="#f44"/>
+    <text x="-10" y="23" text-anchor="end" class="pin-label">+</text>
+    <rect x="-5" y="35" width="10" height="10" fill="#333"/>
+    <text x="-10" y="43" text-anchor="end" class="pin-label">-</text>
+  </g>
+
+  <!-- ==================== WIRING ==================== -->
+
+  <!-- I2C Bus wires (SDA - Blue) -->
+  <g stroke="#4af" stroke-width="2.5" fill="none">
+    <!-- Pi SDA to junction -->
+    <path d="M 85 155 L 280 155 L 280 180"/>
+    <!-- Junction to PCA9685 SDA -->
+    <path d="M 280 180 L 345 180"/>
+    <!-- Junction to INA228 SDA -->
+    <path d="M 280 180 L 280 345 L 345 345"/>
+    <!-- Junction dot -->
+    <circle cx="280" cy="180" r="4" fill="#4af"/>
+  </g>
+
+  <!-- I2C Bus wires (SCL - Light Blue) -->
+  <g stroke="#2196F3" stroke-width="2.5" fill="none">
+    <!-- Pi SCL to junction -->
+    <path d="M 85 170 L 270 170 L 270 195"/>
+    <!-- Junction to PCA9685 SCL -->
+    <path d="M 270 195 L 345 195"/>
+    <!-- Junction to INA228 SCL -->
+    <path d="M 270 195 L 270 360 L 345 360"/>
+    <!-- Junction dot -->
+    <circle cx="270" cy="195" r="4" fill="#2196F3"/>
+  </g>
+
+  <!-- 3.3V Power (Yellow/Orange) -->
+  <g stroke="#fc0" stroke-width="2" fill="none">
+    <!-- Pi 3.3V to junction -->
+    <path d="M 85 140 L 260 140 L 260 150"/>
+    <!-- To PCA9685 VCC -->
+    <path d="M 260 150 L 345 150"/>
+    <!-- To INA228 VCC -->
+    <path d="M 260 150 L 260 315 L 345 315"/>
+    <circle cx="260" cy="150" r="3" fill="#fc0"/>
+  </g>
+
+  <!-- GND wires (Black/Gray) -->
+  <g stroke="#555" stroke-width="2" fill="none">
+    <!-- Pi GND to junction point -->
+    <path d="M 135 170 L 250 170 L 250 165"/>
+    <!-- To PCA9685 GND -->
+    <path d="M 250 165 L 345 165"/>
+    <!-- To INA228 GND -->
+    <path d="M 250 165 L 250 330 L 345 330"/>
+    <!-- To HX711 GND -->
+    <path d="M 135 245 L 250 245 L 250 505 L 345 505"/>
+    <circle cx="250" cy="165" r="3" fill="#555"/>
+  </g>
+
+  <!-- 5V to HX711 (Red) -->
+  <path d="M 135 155 L 240 155 L 240 490 L 345 490" stroke="#f44" stroke-width="2" fill="none"/>
+
+  <!-- GPIO5 to HX711 DOUT (Pink) -->
+  <path d="M 85 335 L 150 335 L 150 520 L 345 520" stroke="#f4a" stroke-width="2.5" fill="none"/>
+
+  <!-- GPIO6 to HX711 SCK (Pink) -->
+  <path d="M 85 350 L 160 350 L 160 535 L 345 535" stroke="#e91e63" stroke-width="2.5" fill="none"/>
+
+  <!-- PCA9685 CH0 to ESC Signal (Orange) -->
+  <path d="M 505 150 L 595 150" stroke="#f90" stroke-width="3" fill="none"/>
+
+  <!-- PCA9685 GND to ESC GND -->
+  <path d="M 505 195 L 540 195 L 540 165 L 595 165" stroke="#555" stroke-width="2" fill="none"/>
+
+  <!-- ESC to Motor -->
+  <path d="M 710 160 L 750 160" stroke="#666" stroke-width="4" fill="none"/>
+
+  <!-- Power to ESC -->
+  <path d="M 595 275 L 560 275 L 560 175 L 595 175" stroke="#f44" stroke-width="3" fill="none"/>
+
+  <!-- Power to INA228 (through measurement) -->
+  <path d="M 595 265 L 540 265 L 540 325 L 505 325" stroke="#f44" stroke-width="3" fill="none" stroke-dasharray="5,3"/>
+  <path d="M 505 345 L 530 345 L 530 290 L 580 290 L 580 175" stroke="#333" stroke-width="3" fill="none" stroke-dasharray="5,3"/>
+
+  <!-- Load cell wires to HX711 -->
+  <path d="M 505 485 L 550 485" stroke="#f44" stroke-width="2" fill="none"/>
+  <path d="M 505 500 L 550 500" stroke="#333" stroke-width="2" fill="none"/>
+  <path d="M 505 520 L 550 515" stroke="#aaa" stroke-width="2" fill="none"/>
+  <path d="M 505 535 L 550 530" stroke="#4c4" stroke-width="2" fill="none"/>
+
+  <!-- ==================== LEGEND ==================== -->
+  <g transform="translate(750, 350)">
+    <rect x="0" y="0" width="200" height="180" rx="5" fill="#fff" stroke="#ccc" stroke-width="1"/>
+    <text x="100" y="20" text-anchor="middle" class="component-label">WIRE COLOR LEGEND</text>
+
+    <line x1="15" y1="40" x2="45" y2="40" stroke="#4af" stroke-width="3"/>
+    <text x="55" y="44" class="pin-label">I2C SDA</text>
+
+    <line x1="15" y1="58" x2="45" y2="58" stroke="#2196F3" stroke-width="3"/>
+    <text x="55" y="62" class="pin-label">I2C SCL</text>
+
+    <line x1="15" y1="76" x2="45" y2="76" stroke="#fc0" stroke-width="3"/>
+    <text x="55" y="80" class="pin-label">3.3V Power</text>
+
+    <line x1="15" y1="94" x2="45" y2="94" stroke="#f44" stroke-width="3"/>
+    <text x="55" y="98" class="pin-label">5V / Battery +</text>
+
+    <line x1="15" y1="112" x2="45" y2="112" stroke="#555" stroke-width="3"/>
+    <text x="55" y="116" class="pin-label">Ground (GND)</text>
+
+    <line x1="15" y1="130" x2="45" y2="130" stroke="#f4a" stroke-width="3"/>
+    <text x="55" y="134" class="pin-label">GPIO (Data)</text>
+
+    <line x1="15" y1="148" x2="45" y2="148" stroke="#f90" stroke-width="3"/>
+    <text x="55" y="152" class="pin-label">PWM Signal</text>
+
+    <line x1="15" y1="166" x2="45" y2="166" stroke="#888" stroke-width="3" stroke-dasharray="5,3"/>
+    <text x="55" y="170" class="pin-label">Current Path</text>
+  </g>
+
+  <!-- ==================== I2C ADDRESS NOTE ==================== -->
+  <g transform="translate(750, 540)">
+    <rect x="0" y="0" width="200" height="70" rx="5" fill="#e3f2fd" stroke="#2196F3" stroke-width="1"/>
+    <text x="100" y="18" text-anchor="middle" class="component-label">I2C ADDRESSES</text>
+    <text x="15" y="38" class="pin-label">PCA9685: 0x40</text>
+    <text x="15" y="55" class="pin-label">INA228:  0x41</text>
+  </g>
+
+  <!-- ==================== WARNINGS ==================== -->
+  <g transform="translate(50, 640)">
+    <rect x="0" y="0" width="900" height="90" rx="5" fill="#ffebee" stroke="#c00" stroke-width="2"/>
+    <text x="450" y="22" text-anchor="middle" class="warning">⚠ SAFETY WARNINGS ⚠</text>
+    <text x="20" y="42" class="note">• ALWAYS disconnect thruster/propeller before testing PWM signals</text>
+    <text x="20" y="56" class="note">• Ensure common ground between all components</text>
+    <text x="20" y="70" class="note">• INA228 must be wired IN-LINE to measure current (between power supply and ESC)</text>
+    <text x="20" y="84" class="note">• Do NOT connect ESC's red power wire to PCA9685 - ESC is powered by main battery</text>
+  </g>
+
+</svg>
