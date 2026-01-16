@@ -45,10 +45,9 @@
         "sample_count": 5
     },
     "hardware": {
-        "pca9685_address": "0x40",
+        "pwm_gpio_pin": 18,
         "ina228_address": "0x41",
-        "hx711_dout_pin": 5,
-        "hx711_sck_pin": 6,
-        "pwm_channel": 0
+        "hx711_dout_pin": 4,
+        "hx711_sck_pin": 17
     }
 }

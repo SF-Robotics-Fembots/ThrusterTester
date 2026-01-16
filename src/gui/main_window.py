@@ -346,7 +346,7 @@ class MainWindow:
                            "- Diamond Dynamics TD1.2\n"
                            "- Blue Robotics T100/T200\n\n"
                            "Hardware:\n"
-                           "- PCA9685 PWM controller\n"
+                           "- Raspberry Pi 5 (Hardware PWM)\n"
                            "- INA228 power monitor\n"
                            "- HX711 load cell")
 

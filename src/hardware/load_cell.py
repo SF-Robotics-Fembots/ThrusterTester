@@ -29,7 +29,7 @@ class LoadCell:
     GAIN_64 = 27   # Channel A, gain 64
     GAIN_32 = 26   # Channel B, gain 32
 
-    def __init__(self, dout_pin: int = 5, sck_pin: int = 6,
+    def __init__(self, dout_pin: int = 4, sck_pin: int = 17,
                  gain: int = GAIN_128, simulate: bool = False):
         """
         Initialize load cell interface.

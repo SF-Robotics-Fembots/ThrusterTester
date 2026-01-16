@@ -1,6 +1,8 @@
 """
-PCA9685 PWM Controller interface for thruster control.
-Based on Adafruit PCA9685 library usage from ROV reference code.
+Hardware PWM Controller for thruster control using Raspberry Pi GPIO.
+
+Uses the Pi's hardware PWM pins for precise ESC control.
+Hardware PWM pins: GPIO 12, 13, 18, 19 (only 2 channels available)
 """
 
 import time
@@ -8,9 +10,7 @@ from typing import Optional
 
 # Hardware imports - will fail gracefully on non-Pi systems
 try:
-    import board
-    import busio
-    from adafruit_pca9685 import PCA9685
+    import RPi.GPIO as GPIO
     HARDWARE_AVAILABLE = True
 except ImportError:
     HARDWARE_AVAILABLE = False
@@ -18,61 +18,76 @@ except ImportError:
 
 class PWMController:
     """
-    Interface for PCA9685 PWM controller to drive thruster ESCs.
+    Interface for Raspberry Pi hardware PWM to drive thruster ESCs.
 
     PWM pulse width conversion:
     - ESCs expect 1000-2000us pulses at 50Hz (20ms period)
-    - PCA9685 uses 16-bit duty cycle (0-65535)
-    - Formula: duty_cycle = int(pulse_us / 10000 * 65536)
+    - At 50Hz, duty cycle percentage = (pulse_us / 20000) * 100
+    - 1500us neutral = 7.5% duty cycle
     """
 
-    def __init__(self, address: int = 0x40, frequency_hz: int = 50,
-                 channel: int = 0, simulate: bool = False):
+    # Hardware PWM capable pins on Pi
+    HARDWARE_PWM_PINS = [12, 13, 18, 19]
+
+    def __init__(self, gpio_pin: int = 18, frequency_hz: int = 50,
+                 simulate: bool = False):
         """
-        Initialize PWM controller.
+        Initialize hardware PWM controller.
 
         Args:
-            address: I2C address of PCA9685 (default 0x40)
+            gpio_pin: GPIO pin for PWM output (12, 13, 18, or 19 for hardware PWM)
             frequency_hz: PWM frequency in Hz (default 50 for ESCs)
-            channel: PWM channel to use (0-15)
             simulate: If True, simulate hardware for testing
         """
-        self.address = address
+        self.gpio_pin = gpio_pin
         self.frequency_hz = frequency_hz
-        self.channel = channel
         self.simulate = simulate or not HARDWARE_AVAILABLE
 
-        self._pca: Optional[PCA9685] = None
+        self._pwm: Optional[GPIO.PWM] = None
         self._current_pwm_us = 1500  # Track current value
         self._is_armed = False
+
+        if gpio_pin not in self.HARDWARE_PWM_PINS:
+            print(f"Warning: GPIO {gpio_pin} is not a hardware PWM pin. "
+                  f"Use one of {self.HARDWARE_PWM_PINS} for best results.")
 
         if not self.simulate:
             self._init_hardware()
 
     def _init_hardware(self):
-        """Initialize PCA9685 hardware."""
+        """Initialize GPIO hardware PWM."""
         try:
-            i2c = busio.I2C(board.SCL, board.SDA)
-            self._pca = PCA9685(i2c, address=self.address)
-            self._pca.frequency = self.frequency_hz
+            GPIO.setmode(GPIO.BCM)
+            GPIO.setup(self.gpio_pin, GPIO.OUT)
+
+            # Create PWM instance
+            self._pwm = GPIO.PWM(self.gpio_pin, self.frequency_hz)
+
+            # Start at neutral (1500us = 7.5% duty cycle at 50Hz)
+            neutral_duty = self._us_to_duty_cycle(1500)
+            self._pwm.start(neutral_duty)
+
         except Exception as e:
-            print(f"Failed to initialize PCA9685: {e}")
+            print(f"Failed to initialize hardware PWM: {e}")
             self.simulate = True
 
-    def _us_to_duty_cycle(self, pulse_us: int) -> int:
+    def _us_to_duty_cycle(self, pulse_us: int) -> float:
         """
-        Convert pulse width in microseconds to PCA9685 duty cycle.
+        Convert pulse width in microseconds to duty cycle percentage.
 
-        Formula from ROV reference code:
-        duty_cycle = int(pulse_us / 10000 * 65536)
+        At 50Hz (20ms period):
+        - 1000us = 5.0% duty cycle
+        - 1500us = 7.5% duty cycle
+        - 2000us = 10.0% duty cycle
 
         Args:
             pulse_us: Pulse width in microseconds (typically 1000-2000)
 
         Returns:
-            16-bit duty cycle value (0-65535)
+            Duty cycle as percentage (0-100)
         """
-        return int(pulse_us / 10000 * 65536)
+        period_us = 1_000_000 / self.frequency_hz  # 20000us at 50Hz
+        return (pulse_us / period_us) * 100
 
     def set_pwm_us(self, pulse_us: int):
         """
@@ -86,9 +101,9 @@ class PWMController:
 
         duty_cycle = self._us_to_duty_cycle(pulse_us)
 
-        if not self.simulate:
+        if not self.simulate and self._pwm:
             try:
-                self._pca.channels[self.channel].duty_cycle = duty_cycle
+                self._pwm.ChangeDutyCycle(duty_cycle)
             except Exception as e:
                 print(f"Failed to set PWM: {e}")
 
@@ -108,7 +123,7 @@ class PWMController:
         Args:
             neutral_pwm_us: Neutral PWM value (typically 1500)
         """
-        print(f"Arming ESC on channel {self.channel}...")
+        print(f"Arming ESC on GPIO {self.gpio_pin}...")
         self.set_pwm_us(neutral_pwm_us)
         time.sleep(2.0)  # Wait for ESC to arm
         self._is_armed = True
@@ -158,12 +173,18 @@ class PWMController:
                 time.sleep(delay_ms / 1000)
 
     def cleanup(self):
-        """Clean up resources."""
-        if self._pca is not None:
+        """Clean up GPIO resources."""
+        if self._pwm is not None:
             try:
                 # Return to neutral before cleanup
                 self.set_pwm_us(1500)
-                self._pca.deinit()
+                self._pwm.stop()
+            except Exception:
+                pass
+
+        if not self.simulate and HARDWARE_AVAILABLE:
+            try:
+                GPIO.cleanup(self.gpio_pin)
             except Exception:
                 pass
 
