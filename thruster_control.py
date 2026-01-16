@@ -15,7 +15,7 @@ except ImportError:
 
 # PWM Configuration
 PWM_GPIO = 18
-PWM_FREQ = 100  # 50Hz for ESC/servo
+PWM_FREQ = 50  # 50Hz for ESC/servo (standard)
 NEUTRAL_US = 1500
 MIN_US = 1100
 MAX_US = 1900
@@ -24,11 +24,11 @@ MAX_US = 1900
 CHIP = 4
 
 
-def us_to_duty(pulse_us: int) -> float:
+def us_to_duty(pulse_us: int, freq_hz: int) -> float:
     """Convert microseconds to duty cycle percentage."""
-    # At 50Hz, period is 20ms (20000us)
-    # duty = (pulse_us / 20000) * 100
-    return (pulse_us / 20000.0) * 100.0
+    # Period in microseconds = 1000000 / freq_hz
+    period_us = 1000000.0 / freq_hz
+    return (pulse_us / period_us) * 100.0
 
 
 def main():
@@ -47,7 +47,8 @@ def main():
 
     # Start PWM at neutral
     try:
-        duty = us_to_duty(NEUTRAL_US)
+        duty = us_to_duty(NEUTRAL_US, PWM_FREQ)
+        print(f"Duty cycle for {NEUTRAL_US}us at {PWM_FREQ}Hz: {duty:.2f}%")
         lgpio.tx_pwm(chip, PWM_GPIO, PWM_FREQ, duty)
         print(f"PWM started at neutral ({NEUTRAL_US}us)")
     except Exception as e:
@@ -78,7 +79,7 @@ def main():
                 break
 
             if cmd == 'n' or cmd == 'neutral':
-                duty = us_to_duty(NEUTRAL_US)
+                duty = us_to_duty(NEUTRAL_US, PWM_FREQ)
                 lgpio.tx_pwm(chip, PWM_GPIO, PWM_FREQ, duty)
                 print(f"Set to neutral ({NEUTRAL_US}us)")
                 continue
@@ -113,14 +114,14 @@ def main():
                     continue
 
             # Run thruster
-            print(f"Running at {pwm_us}us for {duration}s...")
-            duty = us_to_duty(pwm_us)
+            duty = us_to_duty(pwm_us, PWM_FREQ)
+            print(f"Running at {pwm_us}us ({duty:.2f}%) for {duration}s...")
             lgpio.tx_pwm(chip, PWM_GPIO, PWM_FREQ, duty)
 
             time.sleep(duration)
 
             # Return to neutral
-            duty = us_to_duty(NEUTRAL_US)
+            duty = us_to_duty(NEUTRAL_US, PWM_FREQ)
             lgpio.tx_pwm(chip, PWM_GPIO, PWM_FREQ, duty)
             print(f"Returned to neutral ({NEUTRAL_US}us)")
 
@@ -130,7 +131,7 @@ def main():
     finally:
         # Cleanup - return to neutral and stop PWM
         print("\nShutting down...")
-        duty = us_to_duty(NEUTRAL_US)
+        duty = us_to_duty(NEUTRAL_US, PWM_FREQ)
         lgpio.tx_pwm(chip, PWM_GPIO, PWM_FREQ, duty)
         time.sleep(0.5)
         lgpio.tx_pwm(chip, PWM_GPIO, 0, 0)  # Stop PWM
