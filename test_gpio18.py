@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/gsr/bin/env python3
 """Test GPIO18 toggle on Pi 5."""
 
 import lgpio
