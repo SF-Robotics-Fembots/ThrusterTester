@@ -1,147 +1,86 @@
 #!/usr/bin/env python3
 """
 Simple thruster control program for Raspberry Pi 5.
-Uses hardware PWM via sysfs on GPIO12 (PWM0 channel 0).
-Requires: dtoverlay=pwm in /boot/firmware/config.txt
+Uses lgpio gpio_write PWM on GPIO18 via gpiochip4.
 """
 
 import sys
 import time
-import os
+import threading
+
+try:
+    import lgpio
+except ImportError:
+    print("Error: lgpio not installed. Run: sudo apt install python3-lgpio")
+    sys.exit(1)
 
 # PWM Configuration
-PWM_CHIP = 0        # pwmchip0
-PWM_CHANNEL = 0     # channel 0 (GPIO12)
-PWM_FREQ = 50       # 50Hz for ESC/servo
+PWM_GPIO = 18
+PWM_FREQ = 100      # 100Hz
 NEUTRAL_US = 1500
 MIN_US = 1100
 MAX_US = 1900
 
+# Pi 5 uses gpiochip4
+CHIP = 4
 
-class HardwarePWM:
-    """Hardware PWM control via sysfs."""
 
-    def __init__(self, chip=0, channel=0):
+class PWMOutput:
+    """PWM output using lgpio gpio_write in a thread."""
+
+    def __init__(self, chip, gpio, freq_hz=100):
         self.chip = chip
-        self.channel = channel
-        self.pwm_path = f"/sys/class/pwm/pwmchip{chip}"
-        self.channel_path = f"{self.pwm_path}/pwm{channel}"
-        self.exported = False
+        self.gpio = gpio
+        self.period_s = 1.0 / freq_hz
+        self.pulse_us = NEUTRAL_US
+        self.running = False
+        self.thread = None
 
-    def export(self):
-        """Export the PWM channel."""
-        if os.path.exists(self.channel_path):
-            print(f"PWM channel {self.channel} already exported")
-            self.exported = True
-            return True
+        lgpio.gpio_claim_output(chip, gpio, 0)
 
-        try:
-            with open(f"{self.pwm_path}/export", "w") as f:
-                f.write(str(self.channel))
-            # Wait for sysfs to create the channel
-            time.sleep(0.1)
-            self.exported = True
-            print(f"Exported PWM channel {self.channel}")
-            return True
-        except PermissionError:
-            print(f"Permission denied. Run with sudo or add user to gpio group")
-            return False
-        except Exception as e:
-            print(f"Failed to export PWM: {e}")
-            return False
+    def _pwm_loop(self):
+        while self.running:
+            high_s = self.pulse_us / 1000000.0
+            low_s = self.period_s - high_s
+            lgpio.gpio_write(self.chip, self.gpio, 1)
+            time.sleep(high_s)
+            lgpio.gpio_write(self.chip, self.gpio, 0)
+            if low_s > 0:
+                time.sleep(low_s)
 
-    def unexport(self):
-        """Unexport the PWM channel."""
-        if not self.exported:
-            return
-        try:
-            with open(f"{self.pwm_path}/unexport", "w") as f:
-                f.write(str(self.channel))
-        except Exception:
-            pass
+    def start(self):
+        if not self.running:
+            self.running = True
+            self.thread = threading.Thread(target=self._pwm_loop, daemon=True)
+            self.thread.start()
 
-    def set_period_ns(self, period_ns):
-        """Set PWM period in nanoseconds."""
-        try:
-            with open(f"{self.channel_path}/period", "w") as f:
-                f.write(str(int(period_ns)))
-            return True
-        except Exception as e:
-            print(f"Failed to set period: {e}")
-            return False
-
-    def set_duty_ns(self, duty_ns):
-        """Set PWM duty cycle in nanoseconds."""
-        try:
-            with open(f"{self.channel_path}/duty_cycle", "w") as f:
-                f.write(str(int(duty_ns)))
-            return True
-        except Exception as e:
-            print(f"Failed to set duty cycle: {e}")
-            return False
-
-    def enable(self):
-        """Enable PWM output."""
-        try:
-            with open(f"{self.channel_path}/enable", "w") as f:
-                f.write("1")
-            return True
-        except Exception as e:
-            print(f"Failed to enable PWM: {e}")
-            return False
-
-    def disable(self):
-        """Disable PWM output."""
-        try:
-            with open(f"{self.channel_path}/enable", "w") as f:
-                f.write("0")
-            return True
-        except Exception:
-            return False
-
-    def set_frequency_and_pulse(self, freq_hz, pulse_us):
-        """Set frequency and pulse width."""
-        period_ns = int(1e9 / freq_hz)  # Convert Hz to ns
-        duty_ns = int(pulse_us * 1000)   # Convert us to ns
-
-        # Period must be set before duty_cycle, and duty must be <= period
-        self.set_period_ns(period_ns)
-        self.set_duty_ns(duty_ns)
+    def stop(self):
+        self.running = False
+        if self.thread:
+            self.thread.join(timeout=0.1)
+        lgpio.gpio_write(self.chip, self.gpio, 0)
 
     def set_pulse_us(self, pulse_us):
-        """Set pulse width in microseconds."""
-        duty_ns = int(pulse_us * 1000)
-        self.set_duty_ns(duty_ns)
+        self.pulse_us = pulse_us
 
 
 def main():
-    print("=== Thruster Control (Hardware PWM) ===")
-    print(f"PWM Chip: {PWM_CHIP}, Channel: {PWM_CHANNEL} (GPIO12)")
-    print(f"Frequency: {PWM_FREQ}Hz")
+    print("=== Thruster Control ===")
+    print(f"GPIO: {PWM_GPIO}, Frequency: {PWM_FREQ}Hz")
     print(f"Range: {MIN_US}-{MAX_US}us, Neutral: {NEUTRAL_US}us")
     print()
 
-    # Check if pwmchip exists
-    if not os.path.exists(f"/sys/class/pwm/pwmchip{PWM_CHIP}"):
-        print(f"ERROR: /sys/class/pwm/pwmchip{PWM_CHIP} not found!")
-        print("\nMake sure you have enabled the PWM overlay:")
-        print("  Add 'dtoverlay=pwm' to /boot/firmware/config.txt")
-        print("  Then reboot")
+    try:
+        chip = lgpio.gpiochip_open(CHIP)
+    except Exception as e:
+        print(f"Failed to open gpiochip{CHIP}: {e}")
         sys.exit(1)
 
-    # Initialize hardware PWM
-    pwm = HardwarePWM(chip=PWM_CHIP, channel=PWM_CHANNEL)
-
-    if not pwm.export():
-        print("\nTry: sudo python3 thruster_control.py")
-        sys.exit(1)
-
-    # Configure PWM
-    pwm.set_frequency_and_pulse(PWM_FREQ, NEUTRAL_US)
-    pwm.enable()
+    pwm = PWMOutput(chip, PWM_GPIO, PWM_FREQ)
+    pwm.set_pulse_us(NEUTRAL_US)
+    pwm.start()
     print(f"PWM started at neutral ({NEUTRAL_US}us)")
 
-    # ESC initialization sequence
     print("\n--- ESC Initialization ---")
     print("Holding neutral for 3 seconds...")
     time.sleep(3)
@@ -171,11 +110,7 @@ def main():
             if not cmd:
                 continue
 
-            # Parse command
             parts = cmd.split()
-            if len(parts) < 1:
-                print("Usage: <pwm_us> [seconds]")
-                continue
 
             try:
                 pwm_us = int(parts[0])
@@ -183,12 +118,10 @@ def main():
                 print("Invalid PWM value")
                 continue
 
-            # Validate range
             if pwm_us < MIN_US or pwm_us > MAX_US:
                 print(f"PWM must be between {MIN_US} and {MAX_US}us")
                 continue
 
-            # Get duration (default 1 second)
             duration = 1.0
             if len(parts) >= 2:
                 try:
@@ -197,13 +130,10 @@ def main():
                     print("Invalid duration")
                     continue
 
-            # Run thruster
             print(f"Running at {pwm_us}us for {duration}s...")
             pwm.set_pulse_us(pwm_us)
-
             time.sleep(duration)
 
-            # Return to neutral
             pwm.set_pulse_us(NEUTRAL_US)
             print(f"Returned to neutral ({NEUTRAL_US}us)")
 
@@ -211,11 +141,11 @@ def main():
         print("\nInterrupted")
 
     finally:
-        # Cleanup
         print("\nShutting down...")
         pwm.set_pulse_us(NEUTRAL_US)
         time.sleep(0.5)
-        pwm.disable()
+        pwm.stop()
+        lgpio.gpiochip_close(chip)
         print("Done")
 
 
