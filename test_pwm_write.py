@@ -7,8 +7,8 @@ import threading
 
 CHIP = 4
 GPIO = 18
-FREQ = 50
-PERIOD_S = 1.0 / FREQ  # 20ms
+FREQ = 100
+PERIOD_S = 1.0 / FREQ  # 10ms
 
 chip = lgpio.gpiochip_open(CHIP)
 lgpio.gpio_claim_output(chip, GPIO, 0)
