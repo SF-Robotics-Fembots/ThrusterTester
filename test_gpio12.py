@@ -1,11 +1,11 @@
 #!/gsr/bin/env python3
-"""Test GPIO18 toggle on Pi 5."""
+"""Test GPIO12 toggle on Pi 5."""
 
 import lgpio
 import time
 
 CHIP = 4  # Pi 5 uses gpiochip4
-GPIO = 18
+GPIO = 12
 
 chip = lgpio.gpiochip_open(CHIP)
 lgpio.gpio_claim_output(chip, GPIO, 0)
