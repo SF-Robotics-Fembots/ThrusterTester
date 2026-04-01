@@ -18,8 +18,8 @@ except ImportError:
 PWM_GPIO = 18
 PWM_FREQ = 100      # 100Hz
 NEUTRAL_US = 1430
-MIN_US = 1100
-MAX_US = 1900
+MIN_US = 1000
+MAX_US = 2000
 
 # Pi 5 uses gpiochip4
 CHIP = 4
