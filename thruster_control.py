@@ -66,7 +66,18 @@ class PWMOutput:
 
 def main():
     print("=== Thruster Control ===")
-    print(f"GPIO: {PWM_GPIO}, Frequency: {PWM_FREQ}Hz")
+
+    freq_input = input(f"PWM Frequency Hz [{PWM_FREQ}]: ").strip()
+    if freq_input:
+        try:
+            freq = int(freq_input)
+        except ValueError:
+            print("Invalid frequency, using default")
+            freq = PWM_FREQ
+    else:
+        freq = PWM_FREQ
+
+    print(f"GPIO: {PWM_GPIO}, Frequency: {freq}Hz")
     print(f"Range: {MIN_US}-{MAX_US}us, Neutral: {NEUTRAL_US}us")
     print()
 
@@ -76,7 +87,7 @@ def main():
         print(f"Failed to open gpiochip{CHIP}: {e}")
         sys.exit(1)
 
-    pwm = PWMOutput(chip, PWM_GPIO, PWM_FREQ)
+    pwm = PWMOutput(chip, PWM_GPIO, freq)
     pwm.set_pulse_us(NEUTRAL_US)
     pwm.start()
     print(f"PWM started at neutral ({NEUTRAL_US}us)")
