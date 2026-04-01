@@ -18,7 +18,7 @@ except ImportError:
 # PWM Configuration
 THRUSTER_GPIOS = {1: 12, 2: 13, 3: 18, 4: 19}
 PWM_FREQ = 100       # 100Hz
-NEUTRAL_US = 1445
+NEUTRAL_US = 1435
 REVERSE_US = 1400    # Backward (below neutral)
 FORWARD_US = 1600    # Forward (above neutral)
 
