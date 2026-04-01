@@ -18,7 +18,7 @@ except ImportError:
 # PWM Configuration
 THRUSTER_GPIOS = {1: 12, 2: 13, 3: 18, 4: 19}
 PWM_FREQ = 100       # 100Hz
-NEUTRAL_US = 1500
+NEUTRAL_US = 1445
 REVERSE_US = 1400    # Backward (below neutral)
 FORWARD_US = 1600    # Forward (above neutral)
 
@@ -65,43 +65,62 @@ class PWMOutput:
         self.pulse_us = pulse_us
 
 
-def run_test(pwm_outputs, thruster_nums):
+def run_test(pwm_outputs, thruster_nums, reverse_us, neutral_us, forward_us):
     """Run backward/pause/forward test on selected thrusters simultaneously."""
     names = ", ".join(f"T{n} (GPIO {THRUSTER_GPIOS[n]})" for n in thruster_nums)
 
     print(f"\n--- Testing: {names} ---")
 
     # Backward
-    print("  REVERSE ({0}us) for 1 second...".format(REVERSE_US))
+    print(f"  REVERSE ({reverse_us}us) for 1 second...")
     for n in thruster_nums:
-        pwm_outputs[n].set_pulse_us(REVERSE_US)
+        pwm_outputs[n].set_pulse_us(reverse_us)
     time.sleep(1.0)
 
     # Pause
-    print("  NEUTRAL ({0}us) for 1 second...".format(NEUTRAL_US))
+    print(f"  NEUTRAL ({neutral_us}us) for 1 second...")
     for n in thruster_nums:
-        pwm_outputs[n].set_pulse_us(NEUTRAL_US)
+        pwm_outputs[n].set_pulse_us(neutral_us)
     time.sleep(1.0)
 
     # Forward
-    print("  FORWARD ({0}us) for 1 second...".format(FORWARD_US))
+    print(f"  FORWARD ({forward_us}us) for 1 second...")
     for n in thruster_nums:
-        pwm_outputs[n].set_pulse_us(FORWARD_US)
+        pwm_outputs[n].set_pulse_us(forward_us)
     time.sleep(1.0)
 
     # Return to neutral
     for n in thruster_nums:
-        pwm_outputs[n].set_pulse_us(NEUTRAL_US)
+        pwm_outputs[n].set_pulse_us(neutral_us)
     print("  Done - returned to neutral")
+
+
+def get_input(prompt, default):
+    """Prompt for an integer value with a default."""
+    val = input(f"{prompt} [{default}]: ").strip()
+    if not val:
+        return default
+    try:
+        return int(val)
+    except ValueError:
+        print(f"Invalid value, using default {default}")
+        return default
 
 
 def main():
     print("=== 4-Thruster Test ===")
-    print(f"Frequency: {PWM_FREQ}Hz, Neutral: {NEUTRAL_US}us")
-    print(f"Reverse: {REVERSE_US}us, Forward: {FORWARD_US}us")
     print()
     for num, gpio in THRUSTER_GPIOS.items():
         print(f"  Thruster {num} -> GPIO {gpio}")
+    print()
+
+    neutral_us = get_input("Neutral PWM us", NEUTRAL_US)
+    reverse_us = get_input("Reverse PWM us", REVERSE_US)
+    forward_us = get_input("Forward PWM us", FORWARD_US)
+    freq = get_input("PWM Frequency Hz", PWM_FREQ)
+
+    print(f"\nFrequency: {freq}Hz, Neutral: {neutral_us}us")
+    print(f"Reverse: {reverse_us}us, Forward: {forward_us}us")
     print()
 
     try:
@@ -113,8 +132,8 @@ def main():
     # Create PWM outputs for all 4 thrusters
     pwm_outputs = {}
     for num, gpio in THRUSTER_GPIOS.items():
-        pwm_outputs[num] = PWMOutput(chip, gpio, PWM_FREQ)
-        pwm_outputs[num].set_pulse_us(NEUTRAL_US)
+        pwm_outputs[num] = PWMOutput(chip, gpio, freq)
+        pwm_outputs[num].set_pulse_us(neutral_us)
         pwm_outputs[num].start()
 
     print("All PWM outputs started at neutral")
@@ -158,7 +177,7 @@ def main():
                 if not thruster_nums:
                     continue
 
-            run_test(pwm_outputs, thruster_nums)
+            run_test(pwm_outputs, thruster_nums, reverse_us, neutral_us, forward_us)
 
     except KeyboardInterrupt:
         print("\nInterrupted")
@@ -166,7 +185,7 @@ def main():
     finally:
         print("\nShutting down...")
         for pwm in pwm_outputs.values():
-            pwm.set_pulse_us(NEUTRAL_US)
+            pwm.set_pulse_us(neutral_us)
         time.sleep(0.5)
         for pwm in pwm_outputs.values():
             pwm.stop()
