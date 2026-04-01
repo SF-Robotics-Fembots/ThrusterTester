@@ -17,7 +17,7 @@ except ImportError:
 # PWM Configuration
 PWM_GPIO = 18
 PWM_FREQ = 100      # 100Hz
-NEUTRAL_US = 1500
+NEUTRAL_US = 1430
 MIN_US = 1100
 MAX_US = 1900
 
